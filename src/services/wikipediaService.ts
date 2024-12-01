@@ -2,16 +2,26 @@ import { WikipediaArticle, WikipediaResponse } from './types';
 import { fetchWikipediaContent } from './wikipediaApi';
 import { transformToArticle } from './articleTransformer';
 
+const CRYPTO_CATEGORIES = [
+  'Cryptocurrency',
+  'Bitcoin',
+  'Blockchain',
+  'Digital currency',
+  'Cryptography',
+  'Financial technology'
+];
+
 const getRelatedArticles = async (article: WikipediaArticle): Promise<WikipediaArticle[]> => {
   try {
-    const categoryTitles = article.tags.map(tag => `Category:${tag}`).join('|');
+    // First try to get related crypto articles
+    const categoryTitles = CRYPTO_CATEGORIES.map(cat => `Category:${cat}`).join('|');
     const params = new URLSearchParams({
       action: 'query',
       format: 'json',
       origin: '*',
       list: 'categorymembers',
       cmtitle: categoryTitles,
-      cmlimit: '10', // Increased from 5 to ensure we get enough valid articles
+      cmlimit: '10',
       cmtype: 'page'
     });
 
@@ -42,40 +52,28 @@ const getRelatedArticles = async (article: WikipediaArticle): Promise<WikipediaA
 const getRandomArticles = async (count: number = 3, category?: string): Promise<WikipediaArticle[]> => {
   try {
     let titles: string[];
-    const multiplier = 3; // Request more articles to ensure we get enough valid ones
+    const multiplier = 3;
     
-    if (category && category !== "All") {
-      const params = new URLSearchParams({
-        action: 'query',
-        format: 'json',
-        origin: '*',
-        list: 'categorymembers',
-        cmtitle: `Category:${category}`,
-        cmlimit: (count * multiplier).toString(),
-        cmtype: 'page'
-      });
+    // Always use crypto categories for random articles
+    const selectedCategory = category === "All" ? 
+      CRYPTO_CATEGORIES[Math.floor(Math.random() * CRYPTO_CATEGORIES.length)] : 
+      category || CRYPTO_CATEGORIES[Math.floor(Math.random() * CRYPTO_CATEGORIES.length)];
 
-      const categoryResponse = await fetch(`https://en.wikipedia.org/w/api.php?${params}`);
-      if (!categoryResponse.ok) throw new Error('Failed to fetch category articles');
-      
-      const categoryData = await categoryResponse.json() as WikipediaResponse;
-      titles = categoryData.query?.categorymembers?.map(article => article.title) || [];
-    } else {
-      const params = new URLSearchParams({
-        action: 'query',
-        format: 'json',
-        origin: '*',
-        list: 'random',
-        rnnamespace: '0',
-        rnlimit: (count * multiplier).toString()
-      });
+    const params = new URLSearchParams({
+      action: 'query',
+      format: 'json',
+      origin: '*',
+      list: 'categorymembers',
+      cmtitle: `Category:${selectedCategory}`,
+      cmlimit: (count * multiplier).toString(),
+      cmtype: 'page'
+    });
 
-      const randomResponse = await fetch(`https://en.wikipedia.org/w/api.php?${params}`);
-      if (!randomResponse.ok) throw new Error('Failed to fetch random articles');
-      
-      const randomData = await randomResponse.json() as WikipediaResponse;
-      titles = randomData.query?.random?.map(article => article.title) || [];
-    }
+    const categoryResponse = await fetch(`https://en.wikipedia.org/w/api.php?${params}`);
+    if (!categoryResponse.ok) throw new Error('Failed to fetch category articles');
+    
+    const categoryData = await categoryResponse.json() as WikipediaResponse;
+    titles = categoryData.query?.categorymembers?.map(article => article.title) || [];
 
     if (!titles.length) throw new Error('No articles found');
 
@@ -85,9 +83,8 @@ const getRandomArticles = async (count: number = 3, category?: string): Promise<
     const articles = await Promise.all(pages.map(transformToArticle));
     const validArticles = articles.filter(article => article !== null) as WikipediaArticle[];
     
-    // If we don't have enough articles, fetch more
     if (validArticles.length < count) {
-      const moreArticles = await getRandomArticles(count - validArticles.length, category);
+      const moreArticles = await getRandomArticles(count - validArticles.length);
       return [...validArticles, ...moreArticles].slice(0, count);
     }
     
@@ -102,13 +99,15 @@ const searchArticles = async (query: string): Promise<WikipediaArticle[]> => {
   if (!query || query.length < 3) return [];
 
   try {
+    // Append crypto-related terms to the search query
+    const cryptoQuery = `${query} cryptocurrency OR bitcoin OR blockchain`;
     const params = new URLSearchParams({
       action: 'query',
       format: 'json',
       origin: '*',
       list: 'search',
-      srsearch: query,
-      srlimit: '20' // Increased from 10 to ensure we get enough valid articles
+      srsearch: cryptoQuery,
+      srlimit: '20'
     });
 
     const searchResponse = await fetch(`https://en.wikipedia.org/w/api.php?${params}`);

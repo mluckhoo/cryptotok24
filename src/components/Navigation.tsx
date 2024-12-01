@@ -65,10 +65,10 @@ const Navigation = () => {
   };
 
   const handleRandomArticle = async () => {
-    setSearchValue(""); // Clear search value when getting random article
+    setSearchValue(""); 
     toast({
-      title: "Loading random article",
-      description: "Finding something interesting for you...",
+      title: "Loading random crypto fact",
+      description: "Finding something interesting about crypto for you...",
       duration: 2000,
     });
     const randomArticles = await getRandomArticles(3);
@@ -98,10 +98,10 @@ const Navigation = () => {
           : "bg-gradient-to-b from-black/50 to-transparent"
       }`}>
         <div 
-          className="text-xl font-bold text-wikitok-red cursor-pointer"
+          className="text-xl font-bold text-[#f7931a] cursor-pointer"
           onClick={handleRandomArticle}
         >
-          WikTok
+          CryptoTok
         </div>
         <div 
           className="flex items-center bg-black/20 backdrop-blur-sm rounded-full px-4 py-2 cursor-pointer"
@@ -109,13 +109,13 @@ const Navigation = () => {
         >
           <Search className="w-4 h-4 text-white/60 mr-2" />
           <span className="text-white/60 text-sm">
-            {searchValue || "Search articles"}
+            {searchValue || "Search crypto facts"}
           </span>
         </div>
         <div className="flex space-x-6">
           <Compass 
             className={`w-5 h-5 cursor-pointer transition-colors ${
-              location.pathname === "/discover" ? "text-wikitok-red" : "text-white"
+              location.pathname === "/discover" ? "text-[#f7931a]" : "text-white"
             }`}
             onClick={handleDiscoverClick}
           />

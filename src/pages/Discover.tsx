@@ -9,15 +9,15 @@ import { useToast } from "@/components/ui/use-toast";
 
 const categories = [
   "All",
-  "Science",
-  "History",
-  "Technology",
-  "Arts",
-  "Sports",
-  "Nature",
-  "Philosophy",
-  "Politics",
-  "Literature",
+  "Bitcoin",
+  "Ethereum",
+  "Blockchain",
+  "DeFi",
+  "NFTs",
+  "Mining",
+  "Exchanges",
+  "Wallets",
+  "Regulation",
 ];
 
 const Discover = () => {
