@@ -2,7 +2,7 @@
 
 ## Project info
 
-**URL**: https://run.gptengineer.app/projects/201b8585-1009-4e6a-8111-16078ed87215/improve
+**URL**: https://lovable.dev/projects/1264ef2a-2a50-415e-b4e3-abb025ad0e50
 
 ## How can I edit this code?
 
